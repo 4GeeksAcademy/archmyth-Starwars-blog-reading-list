@@ -1,45 +1,124 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			people: [],
+			planets: [],
+			vehicles: [],
+
+			character: null,
+			planet: null,
+			vehicle: null,
+
+			favorites: [],
+			description: {},
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
+			people: async () => {
+				try {
+					const response = await fetch("https://www.swapi.tech/api/people");
+					const data = await response.json();
+					console.log(data);
+					setStore({ people: data.results });
+				} catch (error) {
+					console.error("Error loading characters:", error);
+				}
 			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
+
+			planets: async () => {
+				try {
+					const response = await fetch("https://www.swapi.tech/api/planets");
+					const data = await response.json();
+					console.log(data);
+					setStore({ planets: data.results });
+				} catch (error) {
+					console.error("Error loading planets:", error);
+				}
 			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+			vehicles: async () => {
+				try {
+					const response = await fetch("https://www.swapi.tech/api/vehicles");
+					const data = await response.json();
+					console.log(data);
+					setStore({ vehicles: data.results });
+				} catch (error) {
+					console.error("Error loading vehicles:", error);
+				}
+			},
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
+			getCharacter: async (uid) => {
+				try {
+					const response = await fetch(`https://www.swapi.tech/api/people/${uid}`);
+					const data = await response.json();
+					console.log(data);
+					setStore({ character: data.result.properties });
+				} catch (error) {
+					console.error("Error retrieving character:", error);
+				}
+			},
+
+			getPlanet: async (uid) => {
+				try {
+					const response = await fetch(`https://www.swapi.tech/api/planets/${uid}`);
+					const data = await response.json();
+					console.log(data);
+					setStore({ planet: data.result.properties });
+				} catch (error) {
+					console.error("Error retrieving planet:", error);
+				}
+			},
+
+			getVehicle: async (uid) => {
+				try {
+					const response = await fetch(`https://www.swapi.tech/api/vehicles/${uid}`);
+					const data = await response.json();
+					console.log(data);
+					setStore({ vehicle: data.result.properties });
+				} catch (error) {
+					console.error("Error retrieving vehicle:", error);
+				}
+			},	
+			setItem: (e) => {
+				setStore({
+					favorites:getStore().favorites,
+					item: e,
+					description: getStore().description
+				})	
+			},
+			fetchDescription: (e) => {
+				fetch(e)
+				.then((result) => {
+					result.json()
+				})
+				.then((data) => {
+					setStore({
+						favorites: getStore().favorites,
+						item: getStore().item,
+						description: data.result.properties
+					})
+				})
+			},
+
+			addFavorite: (e) => {
+				setStore({
+					favorites:[ ...new Set([...getStore().favorites, e])], //...new function removes duplicate within array
+					item: getStore().item,
+					description: getStore().description
+				})	
+			},
+
+			removeFavorites: (e) => {
+				setStore({
+					favorites:getStore().favorites.filter((x) =>{
+						return x != e
+					}),
+					item: getStore().item,
+					description: getStore().description
+				})
+			},
 		}
 	};
 };
+			
 
 export default getState;
